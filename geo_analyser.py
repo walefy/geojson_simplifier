@@ -3,6 +3,9 @@ import unicodedata
 from shapely import Polygon, MultiPolygon, geometry, unary_union
 
 
+TOLERANCE = 0.001
+
+
 def read_geojson(path: str):
     with open(path, mode='r') as file:
         return json.loads(file.read())
@@ -10,7 +13,7 @@ def read_geojson(path: str):
 
 def simplify_multipolygon(data: MultiPolygon):
     unified_multipolygon = unary_union(data)
-    return unified_multipolygon.simplify(tolerance=0.01, preserve_topology=True)
+    return unified_multipolygon.simplify(tolerance=TOLERANCE, preserve_topology=True)
 
 
 def count_multipolygon(coordinates: list[list[list[int]]]):
@@ -75,7 +78,7 @@ def main():
                         if is_multipolygon:
                             polygon = simplify_multipolygon(MultiPolygon(item_geometry['coordinates']))
                         else:
-                            polygon = Polygon(coordinates).simplify(tolerance=0.01, preserve_topology=True)
+                            polygon = Polygon(coordinates).simplify(tolerance=TOLERANCE, preserve_topology=True)
 
                         polygon_dict = geometry.mapping(polygon)
                         dict_coordinates = polygon_dict['coordinates']
