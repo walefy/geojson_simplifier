@@ -1,4 +1,5 @@
 import json
+import unicodedata
 from shapely import Polygon, MultiPolygon, geometry, unary_union
 
 
@@ -16,16 +17,21 @@ def count_multipolygon(coordinates: list[list[list[int]]]):
     return sum([len(n[0]) for n in coordinates])
 
 
+def normalize_text(data: str) -> str:
+    normalized_text = unicodedata.normalize('NFD', data.strip().lower())
+    return ''.join(char for char in normalized_text if unicodedata.category(char) != 'Mn')
+
+
 geo_obj = read_geojson('./BR_Municipios_2023.json')
 
 
 def main():
-    search_name = input('>> ').strip().lower()
+    search_name = input('>> ')
 
     for item in geo_obj['features']:
-        city_name = item['properties']['NM_MUN'].strip().lower()
+        city_name = item['properties']['NM_MUN']
 
-        if city_name == search_name:
+        if normalize_text(city_name) == normalize_text(search_name):
             item_geometry = item['geometry']
             item_to_show = item.copy()
             item_to_show['geometry'] = '[...]'
