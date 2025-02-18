@@ -1,9 +1,15 @@
 import json
 import unicodedata
+import dataclasses
 from shapely import Polygon, MultiPolygon, geometry, unary_union
 
 
-TOLERANCE = 0.001
+TOLERANCE = 0.002
+
+@dataclasses.dataclass
+class GeoJson:
+    type: str
+    geometry: dict
 
 
 def read_geojson(path: str):
@@ -67,7 +73,9 @@ def main():
                         length = count_multipolygon(item_geometry['coordinates'])
                         print(f'full coordinates count: {length}')
 
-                    file.write(json.dumps(item_geometry, indent=2))
+                    geojson = GeoJson(type="Feature", geometry=item_geometry)
+                    
+                    file.write(json.dumps(dataclasses.asdict(geojson), indent=2))
                 
                 if not skip_simplify:
                     with open('output/' + city_name + '_simplified.json', 'w') as file:
@@ -86,7 +94,8 @@ def main():
 
                         print(f'simplified coordinates count: {length}')
 
-                        file.write(json.dumps(polygon_dict, indent=2))
+                        geojson = GeoJson(type="Feature", geometry=polygon_dict)
+                        file.write(json.dumps(dataclasses.asdict(geojson), indent=2))
                 
                 print()
 
